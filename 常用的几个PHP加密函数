@@ -1,0 +1,73 @@
+PHP加密方式分为单项散列加密，对称加密，非对称加密这几类。
+像常用的MD5、hash、crypt、sha1这种就是单项散列加密，单项散列加密是不可逆的。
+像URL编码、base64编码这种就是对称加密，是可逆的，就是说加密解密都是用的同一秘钥。
+除此外就是非对称加密，加密和解密的秘钥不是同一个，如果从安全性而言，加密的信息如果还想着再解密回来，非对称加密无疑是最为安全的方式。
+
+★不可逆加密函数：
+（一）、md5
+string md5 ( string str[,boolraw_output = false ] )
+1.md5()默认情况下以 32 字符十六进制数字形式返回散列值，它接受两个参数，第一个为要加密的字符串，第二个为raw_output的布尔值，默认为false，
+如果设置为true，md5()则会返回原始的 16 位二进制格式报文摘要。
+2.md5()为单向加密，没有逆向解密算法，但是还是可以对一些常见的字符串通过收集，枚举，碰撞等方法破解。
+<?php
+      $a='123';
+      echo md5($a);   //string(32) "202cb962ac59075b964b07152d234b70" 
+      echo "<br />";
+      echo md5($a,true); //string(16) " ,�b�Y[�K-#Kp"(因为文本格式所以有偏差)
+
+ 
+（二）、Crypt
+string crypt ( string str[,stringsalt ] )
+1.crypt()接受两个参数，第一个为需要加密的字符串，第二个为盐值（就是加密干扰值，如果没有提供，则默认由PHP自动生成【盐值只能取两位】）；
+返回散列后的字符串或一个少于 13 字符的字符串，后者为了区别盐值。
+2.crypt()为单向加密，跟md5一样。
+<?php
+$user_input = 'mypassword'; //用户输入的值
+$hashed_password = crypt('mypassword'); // 自动生成盐值，$hashed_password结果是不断变化的
+
+/* 你应当使用 crypt() 得到的完整结果作为盐值进行密码校验，以此来避免使用不同散列算法导致的问题。
+（如上所述，基于标准 DES 算法的密码散列使用 2 字符盐值，但是基于 MD5 算法的散列使用 12 个字符盐值。）*/
+
+if (hash_equals($hashed_password, crypt($user_input, $hashed_password))) {
+   echo "Password verified!";
+}
+ 
+详情：https://www.runoob.com/php/func-string-crypt.html
+
+（三）、sha1
+string sha1 ( string str[,boolraw_output = false ]
+1.跟md5很像，不同的是sha1()默认情况下返回40个字符的散列值，传入参数性质一样，第一个为加密的字符串，第二个为raw_output的布尔值，默认为false，
+如果设置为true，sha1()则会返回原始的20位原始格式报文摘要。
+2.sha1()也是单向加密，没有逆向解密算法
+<?php
+      $a='123';
+      var_dump(sha1($a)); //string(40) "40bd001563085fc35165329ea1ff5c5ecbdbbeef" 
+      echo "<br />";
+      var_dump(sha1($a,true)); //string(20) "@�c_�Qe2���\^�۾�"(因为文本格式所以有偏差)
+
+（四）、hash
+string hash($ago,$data);
+1、$ago是可以指定加密使用的哈希算法，例如："md5"，"sha256"，"haval160,4" 等。$data是要加密的数据
+hash加密也是不可逆的，因为是给定一个不确定的字符串返回特定长度的字符串，这个本质意义上来说实现了单项散列加密。
+
+★可逆转的加密函数
+（一）、Urlencode
+urlencode ( string $str )
+1.一个参数，传入要加密的字符串（通常应用于对URL的加密），
+2.urlencode为双向加密，可以用urldecode来解密（严格意义上来说，不算真正的加密）
+3.返回字符串，此字符串中除了 -_. 之外的所有非字母数字字符都将被替换成百分号（%）后跟两位十六进制数，空格则编码为加号（+）。
+
+注：此方法在url后面带参数格式尤为好用，防止URL在传递过程中，参数的特殊符号被误读。
+ 
+（二）、base64编码
+base64_encode ( string $encoded_data )
+1.base64_encode()接受一个参数，也就是要编码的数据（这里不说字符串，是因为很多时候base64用来编码图片）
+2.base64_encode()为双向加密，可用base64_decode()来解密
+base64加密本质上说就是把数据转换为ASCLL码，比如一个图片进行base64编码就会变成一堆以Ascll码连接的字符串，这会更有利于文件的传输，
+当然base64的作用在与文件的传输。例如手机客户端上传文件到服务器，使用base64编码可以轻松实现文件的传输。
+
+
+★特别：在处理参数时，常用到的函数
+使用 krsort() 函数对关联数组按照键名进行降序排序。
+使用 asort() 函数对关联数组按照键值进行升序排序。
+参考文档：https://www.cnblogs.com/phpstudy2015-6/p/8072094.html
